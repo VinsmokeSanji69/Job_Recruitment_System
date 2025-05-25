@@ -10,7 +10,7 @@ class FixedPriceJob extends Model
     protected $table = 'fixed_price_jobs';
 
     protected $fillable = [
-        'id',   // This holds the duration_id
+        'id',
         'price'
     ];
 
@@ -21,7 +21,6 @@ class FixedPriceJob extends Model
         return $this->belongsTo(Job::class);
     }
 
-    // Use 'id' as the foreign key pointing to durations.id
     public function duration(): BelongsTo
     {
         return $this->belongsTo(Duration::class, 'id');

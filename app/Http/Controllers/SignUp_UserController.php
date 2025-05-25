@@ -12,7 +12,6 @@ use Illuminate\Validation\Rules;
 
 class SignUp_UserController
 {
-    // Show the talent registration form
     public function show()
     {
         $experienceLevels = ExperienceLevel::all();
@@ -21,7 +20,6 @@ class SignUp_UserController
         return view('pages.signup_user', compact('experienceLevels', 'englishLevels'));
     }
 
-    // Handle talent registration form submission
     public function store(Request $request)
     {
         $validated = $request->validate([

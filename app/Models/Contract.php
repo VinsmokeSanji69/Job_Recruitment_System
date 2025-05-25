@@ -25,11 +25,6 @@ class Contract extends Model
         'is_completed' => 'boolean',
     ];
 
-    public function getIsCompletedAttribute($value)
-    {
-        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
-    }
-
     public function job(): BelongsTo
     {
         return $this->belongsTo(Job::class);
@@ -39,19 +34,6 @@ class Contract extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    // Get all reviews about a client (from talents)
-    public static function getClientReviews($client_id)
-    {
-        return self::whereHas('job', function($query) use ($client_id) {
-            $query->where('user_id', $client_id);
-        })
-        ->whereNotNull('client_rating')
-        ->whereNotNull('client_feedback')
-        ->get();
-    }
-
-    // Count the number of reviews for a client
     public static function countClientReviews($client_id)
     {
         return self::whereHas('job', function($query) use ($client_id) {
@@ -61,13 +43,7 @@ class Contract extends Model
             ->count();
     }
 
-    // Count the number of job posts for a client
-    public static function countClientPosts($client_id)
-    {
-        return Job::where('user_id', $client_id)->count();
-    }
 
-    // Count the number of hires for a client
     public static function countClientHires($client_id)
     {
         return self::whereHas('job', function($query) use ($client_id) {

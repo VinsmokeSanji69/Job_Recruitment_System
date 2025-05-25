@@ -9,11 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-// Do NOT import Illuminate\Foundation\Auth\User as Authenticatable ← REMOVED!
 
 class User extends Model implements AuthenticatableContract
 {
-    use Authenticatable; // Uses the trait from Illuminate\Auth\Authenticatable
+    use Authenticatable;
 
     public $timestamps = false;
     protected $table = 'users';
@@ -47,40 +46,13 @@ class User extends Model implements AuthenticatableContract
         'name',
     ];
 
-    public function getNameAttribute(): string
-    {
-        return implode(' ', array_filter([
-            $this->first_name,
-            $this->middle_name,
-            $this->last_name
-        ]));
-    }
-
     public function jobs()
     {
         return $this->hasMany(Job::class, 'user_id');
     }
 
 
-    public function activeProposals()
-    {
-        return $this->hasMany(Proposal::class, 'user_id')->whereNotIn('status', ['accepted', 'rejected']);
-    }
 
-    public function pastProposals()
-    {
-        return $this->hasMany(Proposal::class, 'user_id')->whereIn('status', ['accepted', 'rejected']);
-    }
-
-    public function activeContracts()
-    {
-        return $this->hasMany(Contract::class, 'user_id')->where('is_completed', false);
-    }
-
-    public function pastContracts()
-    {
-        return $this->hasMany(Contract::class, 'user_id')->where('is_completed', true);
-    }
 
     public function skills(): BelongsToMany
     {
@@ -90,15 +62,5 @@ class User extends Model implements AuthenticatableContract
             'user_id',
             'skill_id'
         );
-    }
-
-    public function experienceLevel(): BelongsTo
-    {
-        return $this->belongsTo(ExperienceLevel::class);
-    }
-
-    public function englishLevel(): BelongsTo
-    {
-        return $this->belongsTo(EnglishLevel::class);
     }
 }

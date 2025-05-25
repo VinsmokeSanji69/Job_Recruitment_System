@@ -10,14 +10,13 @@ use Illuminate\Support\Facades\Auth;
 
 class DeliverWorkController
 {
-    //
+
     public function activeContracts(){
         $contracts = Contract::where('is_completed', false)->where("user_id",Auth::user()->id)->get();
         return view('pages.Deliver_Work.active_contracts', compact('contracts'));
     }
 
     public function viewContractReview(Request $request){
-        // Get query parameters
         $job_id = $request->query('job_id');
         $duration_id = $request->query('duration_id');
 
@@ -30,12 +29,9 @@ class DeliverWorkController
             'fixedPrice'
         ])->findOrFail($job_id);
 
-        // Determine if the current user is the job poster
         $isJobPoster = $job->user_id === Auth::id();
 
-        // Fetch the correct proposal
         if ($isJobPoster) {
-            // If user is job poster, get the proposal by job_id + proposer's user_id from URL
             $proposer_id = $request->query('user_id');
 
             if (!$proposer_id) {
@@ -46,13 +42,11 @@ class DeliverWorkController
                 ->where('user_id', $proposer_id)
                 ->firstOrFail();
         } else {
-            // If user is a proposer, get their own proposal
             $proposal = Proposal::where('job_id', $job_id)
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
         }
 
-        // Fetch the contract associated with this job and user
         $contract = Contract::where('job_id', $job_id)
             ->where('user_id', $proposal->user_id)
             ->first();

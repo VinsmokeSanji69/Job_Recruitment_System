@@ -15,7 +15,7 @@ class Proposal extends Model
         'job_id',
         'user_id',
         'bid_amount',
-        'duration_id', // Make sure this field exists in DB
+        'duration_id',
         'letter',
         'status',
         'interview_date',

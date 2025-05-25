@@ -15,7 +15,6 @@ class ProposalController
     {
         $user = Auth::user();
 
-        // Fetch active and archived proposals
         $activeProposals = Proposal::with(['job.user'])
             ->where('user_id', $user->id)
             ->whereIn('status', ['pending', 'interviewed'])
@@ -36,53 +35,47 @@ class ProposalController
 
     public function makeProposal(Request $request)
     {
-        // Validate required parameters
         $validated = $request->validate([
             'job_id' => 'required|integer|exists:jobs,id'
         ]);
-    
+
         $job = Job::with([
             'user',
             'role.role_category',
-            'hourly.duration',  // Eager load the hourly relationship with duration
+            'hourly.duration',
             'fixedPrice'
         ])->findOrFail($validated['job_id']);
-    
-        // Get duration_id from the job's hourly relationship if it exists
+
         $duration_id = optional($job->hourly)->duration_id;
-    
-        // Check if user is trying to apply to their own job
+
         if ($job->user_id === Auth::id()) {
             return redirect()->back()
                 ->with('error', 'You cannot apply to your own job post');
         }
-    
-        // Check for existing proposal
+
         if (Proposal::where('job_id', $job->id)
                    ->where('user_id', Auth::id())
                    ->exists()) {
             return redirect()->route('proposal-details', ['job_id' => $job->id])
                 ->with('info', 'You have already applied to this job');
         }
-    
+
         return view('pages.Find_Work.make_proposal', [
             'job' => $job,
-            'duration_id' => $duration_id  // Pass the duration_id from the job
+            'duration_id' => $duration_id
         ]);
     }
 
     public function proposalDetails(Request $request)
 {
-    // Validate request parameters
     $validatedData = $request->validate([
         'job_id' => 'required|integer|exists:jobs,id',
         'user_id' => 'nullable|integer|exists:users,id'
     ]);
-    $route = $request->query('route', ''); // Get the route parameter if exists
+    $route = $request->query('route', '');
     $job_id = $validatedData['job_id'];
     $authUser = Auth::user();
 
-    // Fetch job with relationships or fail
     $job = Job::with([
         'user',
         'role.role_category',
@@ -91,22 +84,18 @@ class ProposalController
         'fixedPrice'
     ])->findOrFail($job_id);
 
-    // Determine if current user is the job poster
     $isJobPoster = $job->user_id === $authUser->id;
 
-    // Fetch the correct proposal
     $proposalQuery = Proposal::where('job_id', $job_id);
 
     if ($isJobPoster) {
-        // Job poster must specify which proposal to view
         if (empty($validatedData['user_id'])) {
             return redirect()->back()
                 ->with('error', 'Please specify a freelancer to view their proposal');
         }
-        
+
         $proposalQuery->where('user_id', $validatedData['user_id']);
     } else {
-        // Freelancer can only view their own proposal
         $proposalQuery->where('user_id', $authUser->id);
     }
 
@@ -117,26 +106,22 @@ class ProposalController
 
     public function submitProposal(Request $request)
     {
-        // Fetch the job so we can validate based on its type
         $job = Job::findOrFail($request->input('job_id'));
-        // Define validation rules dynamically based on job type
         $rules = [
             'job_id' => 'required|exists:jobs,id',
             'bid_amount' => 'required|numeric|min:0',
             'letter' => 'required|string',
         ];
 
-        // Only require duration if it's an hourly job
         if ($job->type === 'hourly') {
             $rules['duration_id'] = 'required|exists:durations,id';
         } else {
-            $rules['duration_id'] = 'nullable|exists:durations,id'; // optional for fixed-price
+            $rules['duration_id'] = 'nullable|exists:durations,id';
         }
 
-        // Run validation
+
         $validated = $request->validate($rules);
 
-        // Create the proposal
         Proposal::create([
             'job_id' => $validated['job_id'],
             'user_id' => Auth::id(),
@@ -168,7 +153,6 @@ class ProposalController
 
     public function reject(Proposal $proposal): RedirectResponse
     {
-        // Ensure only the job owner can reject proposals
         if ($proposal->job->user_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
@@ -180,15 +164,12 @@ class ProposalController
 
     public function hire(Proposal $proposal): RedirectResponse
     {
-        // Ensure only job owner can hire
         if ($proposal->job->user_id !== auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Update proposal status
         $proposal->update(['status' => 'accepted']);
 
-        // Create contract if not already exists
         Contract::firstOrCreate([
             'job_id' => $proposal->job_id,
             'user_id' => $proposal->user_id,
@@ -204,7 +185,6 @@ class ProposalController
     {
         $contract = Contract::findOrFail($contract_id);
 
-        // Update contract with review data
         $contract->is_completed = true;
         $contract->talent_rating = $request->rating;
         $contract->talent_feedback = $request->review_text;

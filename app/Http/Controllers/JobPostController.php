@@ -19,20 +19,16 @@ class JobPostController
 {
     public function showProposerInfo($user_id, $job_id)
     {
-        // Get the user (the proposer)
         $user = User::with(['skills', 'experienceLevel', 'englishLevel'])->findOrFail($user_id);
 
-        // Get the job post (for return link or context)
         $job = Job::with('user')->findOrFail($job_id);
 
-        // Get contracts where this user is the talent and client left feedback
         $contracts = Contract::where('user_id', $user->id)
             ->whereNotNull('client_rating')
             ->whereNotNull('client_feedback')
             ->with(['job'])
             ->get();
 
-        // Return the user info view with all variables
         return view('pages.Profile.users_info', compact('user', 'job', 'contracts'));
     }
     public function myJobPosts()
@@ -45,7 +41,6 @@ class JobPostController
     {
         $id = $request->query('id');
 
-        // Eager-load contracts and other required relationships
         $job_post = Job::with([
             'user',
             'role',
@@ -57,7 +52,6 @@ class JobPostController
             },
             'contracts'
         ])->findOrFail($id);
-        // Debug proposals
 
         return view('pages.Job_Post.view_mypost', compact('job_post'));
     }
@@ -75,18 +69,15 @@ class JobPostController
             'fixedPrice'
         ])->findOrFail($id);
 
-        // Get client ID from job poster
         $client_id = $job_post->user_id;
 
-        // Fetch reviews written by talents about this client
         $talentReviews = Contract::with('job')
             ->whereHas('job', function ($query) use ($client_id) {
-                $query->where('user_id', $client_id); // Contracts for jobs posted by this client
+                $query->where('user_id', $client_id);
             })
-            ->whereNotNull('talent_feedback') // Only include contracts where talent gave feedback
+            ->whereNotNull('talent_feedback')
             ->get();
 
-        // Get client statistics
         $clientStats = [
             'reviewCount' => Contract::countClientReviews($client_id),
             'postCount' => Job::where('user_id', $client_id)->count(),
@@ -106,7 +97,6 @@ class JobPostController
         $experienceLevels = ExperienceLevel::all();
         $englishLevels = EnglishLevel::all();
 
-        // Load categories with their roles
         $roleCategories = RoleCategory::with('roles')->get();
         $duration = Duration::all();
         return view('pages.Job_Post.post_job', compact(

@@ -17,35 +17,29 @@ class HomeController
 
         $user = Auth::user();
 
-        // Job deactivation logic
         $thirtyDaysAgo = now()->subDays(30);
-        
-        // First get all active jobs
+
         $activeJobs = Job::where('is_active', true)->get();
-        
+
         $jobsToDeactivate = $activeJobs->filter(function($job) use ($thirtyDaysAgo) {
-            // Case 1: No contracts AND no hired proposals AND older than 30 days
-            if ($job->created_at < $thirtyDaysAgo && 
-                $job->contracts->isEmpty() && 
+            if ($job->created_at < $thirtyDaysAgo &&
+                $job->contracts->isEmpty() &&
                 !$job->proposals->contains('status', 'hired')) {
                 return true;
             }
-            
-            // Case 2: Number of active contracts meets/exceeds number_of_hires
+
             $activeContractsCount = $job->contracts->where('is_completed', false)->count();
             if ($activeContractsCount >= $job->number_of_hires) {
                 return true;
             }
-            
+
             return false;
         })->pluck('id');
 
-        // Update in batch
         if ($jobsToDeactivate->isNotEmpty()) {
             Job::whereIn('id', $jobsToDeactivate)->update(['is_active' => false]);
         }
 
-        // Rest of the original logic remains the same...
         $query = Job::where('user_id', '!=', $user->id)
             ->where('is_active', true)
             ->with(['user', 'role.role_category', 'contracts', 'proposals']);
@@ -75,12 +69,12 @@ class HomeController
         // Filter best match jobs
         $best_match = $jobs->filter(function ($job) use ($user, $search) {
             $matchesEnglishLevel = $job->english_level_id === $user->english_level_id;
-            
+
             if ($search) {
                 $jobTitle = strtolower($job->title ?? '');
                 return $matchesEnglishLevel && Str::contains($jobTitle, strtolower($search));
             }
-            
+
             return $matchesEnglishLevel;
 
         });

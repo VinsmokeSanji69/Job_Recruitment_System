@@ -15,12 +15,11 @@ class ProfileController
         $user = auth()->user();
         $id = $request->query('id') ?? $user->id;
 
-        // Get all contracts where the user is the talent (user_id is the talent)
-        // and the client (job->user_id) gave a review
+
         $contracts = Contract::where('user_id', $id)
             ->whereNotNull('client_rating')
             ->whereNotNull('client_feedback')
-            ->with(['job']) // Load job relationship to access job title
+            ->with(['job'])
             ->get();
 
         return view('pages.Profile.profile', compact('user','contracts'));
