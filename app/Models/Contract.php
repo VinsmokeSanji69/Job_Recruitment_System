@@ -43,7 +43,6 @@ class Contract extends Model
             ->count();
     }
 
-
     public static function countClientHires($client_id)
     {
         return self::whereHas('job', function($query) use ($client_id) {

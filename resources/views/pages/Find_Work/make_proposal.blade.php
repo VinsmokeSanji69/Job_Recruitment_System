@@ -344,8 +344,8 @@
                                     <span class="input-group-text">$</span>
                                 </div>
                                 <input type="number" step="0.01" class="form-control"
-                                value="{{ $job->type === 'hourly' ? number_format($job->hourly->rate_max ?? 0, 2) : number_format($job->fixedPrice->price ?? 0, 2) }}"
-                                id="bid" name="bid_amount" placeholder="Enter your bid">                            
+                                value="{{ $job->type === 'hourly' ? ($job->hourly->rate_max ) : ($job->fixedPrice->price) }}"
+                                id="bid" name="bid_amount" placeholder="Enter your bid">
                         </div>
                         </div>
 

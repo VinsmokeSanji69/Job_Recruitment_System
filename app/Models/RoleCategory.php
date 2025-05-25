@@ -11,4 +11,9 @@ class RoleCategory extends Model
     protected $fillable = [
         'name',
     ];
+
+    public function roles()
+    {
+        return $this->hasMany(Role::class, 'role_category_id');
+    }
 }

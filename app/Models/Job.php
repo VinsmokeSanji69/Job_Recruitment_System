@@ -45,7 +45,9 @@ class Job extends Model
     public function exp(){
         return$this->belongsTo(ExperienceLevel::class,'experience_level_id');
     }
-
+    public function eng(){
+        return$this->belongsTo(ExperienceLevel::class,'english_level_id');
+    }
     public function proposals()
     {
         return $this->hasMany(Proposal::class, 'job_id');
@@ -70,4 +72,8 @@ class Job extends Model
         return $this->hasOne(HourlyJob::class, 'id');
     }
 
+    public function fixedPrice()
+    {
+        return $this->hasOne(FixedPriceJob::class, 'id');
+    }
 }

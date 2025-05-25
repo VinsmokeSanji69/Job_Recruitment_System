@@ -228,9 +228,6 @@
     <div class="profile-header">
         <img src="/icons/icon_profile.png" alt="Profile Icon" class="profile-large">
         <h2>{{ $user->name }}</h2>
-        <a href="{{ route('myProfileSettings') }}" class="profile-settings-btn">
-            Profile Settings
-        </a>
     </div>
 
     <div class="row">
