@@ -11,25 +11,25 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 
-// Public Routes
-Route::get('/', function () {
-    return view('welcome');
-});
+    // Public Routes
+    Route::get('/', function () {
+        return view('welcome');
+    });
 
-// Authentication Routes
-Route::get('/login', [LogInController::class, 'show'])->name('login');
-Route::post('/login', [LogInController::class, 'signIn'])->name('auth');
-Route::post('/logout', [LogInController::class, 'logOut'])->name('logout');
-Route::get('/signup', [SignUpController::class, 'show'])->name('signup');
+    // Authentication Routes
+    Route::get('/login', [LogInController::class, 'show'])->name('login');
+    Route::post('/login', [LogInController::class, 'signIn'])->name('auth');
+    Route::post('/logout', [LogInController::class, 'logOut'])->name('logout');
+    Route::get('/signup', [SignUpController::class, 'show'])->name('signup');
 
-// User Registration Routes
-Route::controller(SignUp_UserController::class)->group(function () {
+    // User Registration Routes
+    Route::controller(SignUp_UserController::class)->group(function () {
     Route::get('/registertration', [SignUp_UserController::class, 'show'])->name('user.register.show');
     Route::post('/register/user', [SignUp_UserController::class, 'store'])->name('user.register');
-});
+    });
 
-// Authenticated Routes
-Route::middleware('auth')->group(function () {
+    // Authenticated Routes
+    Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'show'])->name('home');
     Route::post('/job-post/create', [JobPostController::class, 'createJob'])->name('createJob');
 
