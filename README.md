@@ -1,4 +1,4 @@
-# Job Marketplace Platform System
+# Job Recruitment System
 
 This is a web-based job marketplace system that connects **clients** (employers) and **talents** (freelancers). The platform facilitates job postings, proposal submissions, contract management, and mutual reviews between users.
 
